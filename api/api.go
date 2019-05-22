@@ -3,7 +3,7 @@ package api
 import (
 	"time"
 
-	"github.com/Q2h1Cg/dnsbrute/log"
+	"github.com/zedundun/dnsbrute/log"
 )
 
 // API 接口定义

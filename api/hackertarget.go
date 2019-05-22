@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/Q2h1Cg/dnsbrute/log"
+	"github.com/zedundun/dnsbrute/log"
 )
 
 type hackertarget struct{}

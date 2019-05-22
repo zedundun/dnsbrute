@@ -6,7 +6,7 @@ import (
 
 	"github.com/miekg/dns"
 
-	"github.com/Q2h1Cg/dnsbrute/log"
+	"github.com/zedundun/dnsbrute/log"
 )
 
 const timeout = time.Second
