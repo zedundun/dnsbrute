@@ -26,6 +26,7 @@ func (h hackertarget) Query(domain string) <-chan string {
 	go func() {
 		defer close(ch)
 
+		//https://api.hackertarget.com/dnslookup/?q=domain
 		url := "http://api.hackertarget.com/hostsearch/?q=" + domain
 		client := http.Client{Timeout: timeout}
 		resp, err := client.Get(url)

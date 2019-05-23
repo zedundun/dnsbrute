@@ -5,15 +5,18 @@ import (
 	"encoding/csv"
 	"flag"
 	"fmt"
+	"net/http"
 	"os"
+	"strings"
 	"time"
 
-	"github.com/zedundun/dnsbrute/api"
+	//"github.com/zedundun/dnsbrute/api"
 	"github.com/zedundun/dnsbrute/dns"
 	"github.com/zedundun/dnsbrute/log"
 )
 
 const versionNumber = "2.0.1#20180301"
+const timeout = 5 * time.Second
 
 func main() {
 	version := flag.Bool("version", false, "Show program's version number and exit")
@@ -80,7 +83,7 @@ func mixInAPIDict(domain, dict string) <-chan string {
 	subDomainsToQuery := make(chan string)
 	mix := make(chan string)
 
-	// mix in
+	// mix in to subDomainsToQuery
 	go func() {
 		defer close(subDomainsToQuery)
 
@@ -94,19 +97,32 @@ func mixInAPIDict(domain, dict string) <-chan string {
 		}
 	}()
 
-	// API
-	// 同步，保证 API 完整执行
-	for sub := range api.Query(domain) {
-		mix <- sub
-	}
-
 	go func() {
 		defer close(mix)
 
 		// Domain
 		mix <- domain
 
-		// Dict
+		//call API to get subDomain
+		//https://api.hackertarget.com/dnslookup/?q=domain
+		url := "http://api.hackertarget.com/hostsearch/?q=" + domain
+		client := http.Client{Timeout: timeout}
+		resp, err := client.Get(url)
+		if err != nil {
+			log.Info("error while fetching api.hackertarget.com:", err)
+		} else {
+			scanner := bufio.NewScanner(resp.Body)
+			for scanner.Scan() {
+				record := scanner.Text()
+				if record != "" {
+					fmt.Println(strings.Split(record, ",")[0])
+					mix <- strings.Split(record, ",")[0]
+				}
+			}
+			resp.Body.Close()
+		}
+
+		// get subDomain for dict
 		file, err := os.Open(dict)
 		if err != nil {
 			log.Fatal(err)
